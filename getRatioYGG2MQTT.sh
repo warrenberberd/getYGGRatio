@@ -83,6 +83,9 @@ if [ -z "${REFERER}" ];then
         STATUS="KO"
 fi
 
+#YGG_URL=`echo "${REFERER}" | sed 's/www[0-9]/www/'`              
+YGG_URL=`echo "${REFERER}" | sed 's#/$##'`                        
+echo "[INFO] new URL : ${YGG_URL}"                                
 
 [ "${RESPONSE}" = "null" ] && unset Response
 
@@ -112,12 +115,12 @@ fi
 
 
 
-## DEBUG du First GET
+## DEBUG First GET
 [ -n "${DEBUG}" ] && echo "[DEBUG] Response : " >&2
 [ -n "${DEBUG}" ] && cat "${TMP}" | python -m json.tool >&2
 
 #################################################################################################################
-# Creation de la requete de login
+# Creating login request
 cat > "${TMP_JSON}" <<- EOF
 {
           "cmd": "request.post",
@@ -188,7 +191,7 @@ if [ ${RC} -ne 0 ];then
 fi
 
 #################################################################################################################
-# Verification du login
+# Login verification
 STATUS=`cat "${TMP}" | jq '.status' 2>/dev/null | tr -d '"'`
 MSG=`cat "${TMP}" | jq '.message' 2>/dev/null | tr -d '"'`
 HTTP_CODE=`cat "${TMP}" | jq '.solution.status' 2>/dev/null | tr -d '"'`
@@ -217,6 +220,8 @@ if [ "${STATUS}" != "ok" ] || [ "${HTTP_CODE}" != "200" ];then
 
         rm -f "${TMP}" "${TMP_JSON}"
         exit 50
+else
+        echo "[INFO] Login ygg OK"
 fi
 
 ## DEBUG DU LOGIN
@@ -226,9 +231,9 @@ fi
 [ -n "${DEBUG}" ] && cat "${TMP}" | python -m json.tool >&2
 
 #################################################################################################################
-# Recuperation du RATIO
+# Retrieve Ratio
 echo "[INFO] GET Ratio..." >&2
-HEADERS="\"headers\": {\"Accept\": \"application/json, text/javascript, */*; q=0.01\", \"X-Requested-With\": \"XMLHttpRequest\", \"Referer\": \"${REFERER}\"}"
+HEADERS="\"headers\": {\"Accept\": \"application/json, text/javascript, */*; q=0.01\", \"Content-type\": \"application/json; charset=UTF-8\", \"X-Requested-With\": \"XMLHttpRequest\", \"Referer\": \"${REFERER}\"}"
 QUERY="{\"cmd\": \"request.get\",\"url\":\"${YGG_URL}/user/ajax_usermenu\",\"userAgent\": \"${USER_AGENT}\",\"maxTimeout\": ${TIMEOUT},\"session\":\"${SESSION_ID}\",${HEADERS}}"
 curl -s -S -L -X POST "${FLARESOLVR_URL}/v1" -H 'Content-Type: application/json' -d "${QUERY}" | python -m json.tool  > "${TMP}"
 RC=$?
@@ -246,6 +251,7 @@ fi
 [ -n "${DEBUG}" ] && echo "[DEBUG] Response : " >&2
 [ -n "${DEBUG}" ] && cat "${TMP}" | python -m json.tool  >&2
 
+MESSAGE=`cat "${TMP}" | jq ".message" | tr -d '"'`
 STATUS=`cat "${TMP}" | jq ".status" | tr -d '"'`
 RESPONSE=`cat "${TMP}" | jq ".solution.response"`
 [ "${RESPONSE}" = "null" ] && unset Response
@@ -262,7 +268,7 @@ fi
 
 
 #################################################################################################################
-# Suppression de la session FlareSolvrr
+# FlareSolvrr session cleanup
 echo "[INFO] Cleaning session" >&2
 curl -s -S -L -X POST "${FLARESOLVR_URL}/v1" -H 'Content-Type: Content-Type: application/json' -d "${DESTROY_JSON}" | python -m json.tool > "${TMP}"
 RCE=$?
@@ -286,7 +292,7 @@ fi
 #printf "\n[INFO] Réponse : \n"
 #printf "%s\n" "${RESPONSE}"
 
-# Attention les yeux pour le parsing...
+# Sorry for this hard "on liner"...
 echo "${RESPONSE}" \
         | sed 's/^"//' | sed 's/"$//' \
         | sed 's/\\"/"/g' | sed 's/\\\\/\\/g' \
