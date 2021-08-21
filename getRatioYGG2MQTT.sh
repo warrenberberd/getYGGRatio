@@ -321,7 +321,7 @@ DOWNLOAD=`echo "${DOWNLOAD}" | sed 's/Ko/*1024/'| sed 's/Mo/*1048576/' | sed 's/
 UPLOAD=`echo "${UPLOAD}" | sed 's/Ko/*1024/'| sed 's/Mo/*1048576/' | sed 's/Go/*1073741824/' | sed 's/To/*1099511627776/' | sed 's/To/*1125899906842624/' | bc `
 
 printf "Download: %s (%s)\n" "${DOWNLOAD}" "${RAW_DOWNLOAD}"
-printf "Upload:   %s (%s)\n" "${UPLOAD}" "${RAW_UPLOAD}"
+printf "Upload:   %s (%s)\n" "${UPLOAD}" "${RAW_UPLOAD}" 
 printf "Ratio:    %s\n" "${RATIO}"
 
 # If no MQTT, stop here
