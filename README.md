@@ -40,6 +40,7 @@ YGG_PASSWORD="YGG_PASSWORD"                     # YGG Password
 
 
 ## Example
+```
 $ ./getRatioYGG2MQTT.sh
 [INFO] SessionID: 22e5ad20-a2e5-11eb-a502-f181adca5c60
 [INFO] GET https://www.yggtorrent.li...
@@ -50,3 +51,4 @@ Download: 1396379767275.52 (1.27To)
 Upload:   871524026286.08 (811.67Go)
 Ratio:    1.60
 [INFO] Infos successfuly uploaded to MQTT
+```
